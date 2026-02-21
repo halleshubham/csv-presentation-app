@@ -7,8 +7,8 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest   # ✅ GitHub-hosted runner
-    environment: VPS         # ✅ environment secrets
+    runs-on: ubuntu-latest
+    environment: VPS
 
     steps:
       - uses: actions/checkout@v4
@@ -33,10 +33,19 @@ jobs:
             echo "❌ VPS_SSH_KEY is empty"
             exit 1
           fi
+
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/github-actions
+          echo "${{ secrets.VPS_SSH_KEY }}" | tr -d '\r' > ~/.ssh/github-actions
+
+          if [ ! -s ~/.ssh/github-actions ]; then
+            echo "❌ SSH key file is empty"
+            exit 1
+          fi
+
           chmod 600 ~/.ssh/github-actions
-          ssh-keyscan ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+          echo "✅ SSH setup complete"
 
       - name: Deploy dist
         run: |
