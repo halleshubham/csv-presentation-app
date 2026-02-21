@@ -7,7 +7,6 @@ const STORAGE_KEY = 'csv-presentation-data';
 const SLIDE_INDEX_KEY = 'csv-presentation-slide-index';
 const FONT_SIZE_KEY = 'csv-presentation-font-size';
 const CUSTOM_SLIDES_KEY = 'csv-presentation-custom-slides';
-const THEME_KEY = 'csv-presentation-theme';
 
 function App() {
   const [appState, setAppState] = useState('upload');
