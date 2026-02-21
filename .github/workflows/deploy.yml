@@ -41,13 +41,13 @@ jobs:
       - name: Deploy dist
         run: |
           rsync -avz --delete \
-            -e "ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes" \
+            -e "ssh -i ~/.ssh/github-actions -o IdentitiesOnly=yes" \
             dist/ \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/deploy/shacky-apps/csv-presentation-app/dist
 
       - name: Restart PM2
         run: |
-          ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+          ssh -i ~/.ssh/github-actions -o IdentitiesOnly=yes \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
               cd /home/deploy/shacky-apps/csv-presentation-app
               pm2 restart csv-presentation-app || pm2 start ecosystem.config.js
