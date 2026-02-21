@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest   # ✅ GitHub-hosted runner
     environment: VPS         # ✅ environment secrets
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -40,13 +40,16 @@ jobs:
 
       - name: Deploy dist
         run: |
-          rsync -avz --delete dist/ \
-          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/deploy/shacky-apps/csv-presentation-app/dist
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes" \
+            dist/ \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/deploy/shacky-apps/csv-presentation-app/dist
 
       - name: Restart PM2
         run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd /home/deploy/shacky-apps/csv-presentation-app
-            pm2 restart csv-presentation-app || pm2 start ecosystem.config.js
-            pm2 save
-          EOF
+          ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+              cd /home/deploy/shacky-apps/csv-presentation-app
+              pm2 restart csv-presentation-app || pm2 start ecosystem.config.js
+              pm2 save
+            EOF
