@@ -7,8 +7,9 @@ on:
 
 jobs:
   deploy:
-    runs-on: VPS
-
+    runs-on: ubuntu-latest   # ✅ GitHub-hosted runner
+    environment: VPS         # ✅ environment secrets
+    
     steps:
       - uses: actions/checkout@v4
 
