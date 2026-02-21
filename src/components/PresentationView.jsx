@@ -7,6 +7,7 @@ import HelpModal from './HelpModal';
 const SLIDE_INDEX_KEY = 'csv-presentation-slide-index';
 const FONT_SIZE_KEY = 'csv-presentation-font-size';
 const CUSTOM_SLIDES_KEY = 'csv-presentation-custom-slides';
+const THEME_KEY = 'csv-presentation-theme';
 
 export default function PresentationView({ slides: initialSlides, onRestart }) {
   // Merge initial slides with custom slides from localStorage
@@ -27,6 +28,15 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
   const [showAddSlideModal, setShowAddSlideModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem(THEME_KEY);
+      return saved || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
   // Load saved state from localStorage
   const [currentSlide, setCurrentSlide] = useState(() => {
     try {
@@ -58,6 +68,13 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
   useEffect(() => {
     localStorage.setItem(FONT_SIZE_KEY, fontSize);
   }, [fontSize]);
+
+  // Save theme to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(THEME_KEY, theme);
+    // Apply theme to body for global styling
+    document.body.className = theme === 'light' ? 'light-theme' : 'dark-theme';
+  }, [theme]);
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
@@ -144,6 +161,10 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
 
   const handleCloseHelp = () => {
     setShowHelpModal(false);
+  };
+
+  const handleToggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
   const handleDownloadPDF = async () => {
@@ -399,7 +420,7 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
   };
 
   return (
-    <div className="presentation-view">
+    <div className={`presentation-view ${theme}-theme`}>
       <div className={`slide-canvas ${fadeClass} font-${fontSize}`}>
         <SlideRenderer
           slide={slides[currentSlide]}
@@ -420,6 +441,8 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
         onHelp={handleOpenHelp}
         onDownloadPDF={handleDownloadPDF}
         isGeneratingPDF={isGeneratingPDF}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
       />
 
       {showAddSlideModal && (

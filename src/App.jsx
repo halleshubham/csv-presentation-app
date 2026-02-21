@@ -7,6 +7,7 @@ const STORAGE_KEY = 'csv-presentation-data';
 const SLIDE_INDEX_KEY = 'csv-presentation-slide-index';
 const FONT_SIZE_KEY = 'csv-presentation-font-size';
 const CUSTOM_SLIDES_KEY = 'csv-presentation-custom-slides';
+const THEME_KEY = 'csv-presentation-theme';
 
 function App() {
   const [appState, setAppState] = useState('upload');
@@ -49,11 +50,12 @@ function App() {
   };
 
   const handleRestart = () => {
-    // Clear all localStorage data
+    // Clear all localStorage data except theme preference
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(SLIDE_INDEX_KEY);
     localStorage.removeItem(FONT_SIZE_KEY);
     localStorage.removeItem(CUSTOM_SLIDES_KEY);
+    // Keep theme preference - don't remove THEME_KEY
 
     setAppState('upload');
     setSlides([]);
