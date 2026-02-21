@@ -56,4 +56,9 @@ jobs:
 
       - name: Restart PM2
         run: |
-          pm2 restart csv-presentation-app 
+          ssh -i ~/.ssh/github-actions -o IdentitiesOnly=yes \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+              cd /home/deploy/shacky-apps/csv-presentation-app
+              pm2 restart csv-presentation-app || pm2 start ecosystem.config.js
+              pm2 save
+            'EOF'
