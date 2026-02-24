@@ -21,8 +21,11 @@ export default function UploadScreen({ onFileProcessed }) {
     if (!file) {
       return 'No file selected';
     }
-    if (!file.name.endsWith('.csv')) {
-      return 'Please select a CSV file (.csv)';
+    const isCSV = file.name.endsWith('.csv');
+    const isJSON = file.name.endsWith('.json');
+
+    if (!isCSV && !isJSON) {
+      return 'Please select a CSV or JSON file';
     }
     return null;
   };
@@ -98,7 +101,7 @@ export default function UploadScreen({ onFileProcessed }) {
     <div className="upload-screen">
       <div className="upload-container">
         <h1 className="upload-title">CSV Presentation Generator</h1>
-        <p className="upload-subtitle">Upload your activity CSV file to generate an interactive presentation</p>
+        <p className="upload-subtitle">Upload your activity CSV file or JSON presentation to generate an interactive presentation</p>
 
         <button className="template-download-button" onClick={handleDownloadTemplate}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -119,7 +122,7 @@ export default function UploadScreen({ onFileProcessed }) {
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
             </svg>
             <p className="dropzone-text">
-              {dragActive ? 'Drop your CSV file here' : 'Drag and drop your CSV file here'}
+              {dragActive ? 'Drop your file here' : 'Drag and drop your CSV or JSON file here'}
             </p>
             <p className="dropzone-or">or</p>
             <button className="browse-button" onClick={handleBrowseClick}>
@@ -128,7 +131,7 @@ export default function UploadScreen({ onFileProcessed }) {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".csv"
+              accept=".csv,.json"
               onChange={handleChange}
               style={{ display: 'none' }}
             />

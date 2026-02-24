@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
-export default function AddSlideModal({ onClose, onAdd }) {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+export default function AddSlideModal({ onClose, onAdd, editSlide }) {
+  const [title, setTitle] = useState(editSlide?.title || '');
+  const [content, setContent] = useState(editSlide?.content || '');
 
   const handleAdd = () => {
     if (!title.trim()) {
@@ -29,7 +29,7 @@ export default function AddSlideModal({ onClose, onAdd }) {
     <div className="modal-overlay" onClick={onClose} onKeyDown={handleKeyDown}>
       <div className="modal-content add-slide-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>Add Custom Slide</h3>
+          <h3>{editSlide ? 'Edit Custom Slide' : 'Add Custom Slide'}</h3>
           <button className="modal-close" onClick={onClose} title="Close">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -72,7 +72,7 @@ export default function AddSlideModal({ onClose, onAdd }) {
               Cancel
             </button>
             <button className="button-primary" onClick={handleAdd}>
-              Add Slide
+              {editSlide ? 'Save Changes' : 'Add Slide'}
             </button>
           </div>
         </div>

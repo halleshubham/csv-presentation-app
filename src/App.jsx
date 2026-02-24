@@ -33,15 +33,46 @@ function App() {
   const handleFileProcessed = async (file) => {
     try {
       setError('');
-      const result = await parseCSV(file);
-      setSlides(result.slides);
-      setAppState('presentation');
 
-      // Save to localStorage
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        slides: result.slides,
-        timestamp: new Date().toISOString()
-      }));
+      // Check if it's a JSON file
+      if (file.name.endsWith('.json')) {
+        const text = await file.text();
+        const jsonData = JSON.parse(text);
+
+        // Validate JSON structure
+        if (!jsonData.slides || !Array.isArray(jsonData.slides)) {
+          throw new Error('Invalid JSON format. Missing slides array.');
+        }
+
+        setSlides(jsonData.slides);
+        setAppState('presentation');
+
+        // Save to localStorage
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          slides: jsonData.slides,
+          timestamp: new Date().toISOString()
+        }));
+
+        // Restore saved state if available
+        if (jsonData.currentSlide !== undefined) {
+          localStorage.setItem(SLIDE_INDEX_KEY, jsonData.currentSlide.toString());
+        }
+        if (jsonData.fontSize) {
+          localStorage.setItem(FONT_SIZE_KEY, jsonData.fontSize);
+        }
+
+      } else {
+        // CSV file processing
+        const result = await parseCSV(file);
+        setSlides(result.slides);
+        setAppState('presentation');
+
+        // Save to localStorage
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          slides: result.slides,
+          timestamp: new Date().toISOString()
+        }));
+      }
     } catch (err) {
       setError(err.message || 'An error occurred while processing the file');
       setAppState('upload');

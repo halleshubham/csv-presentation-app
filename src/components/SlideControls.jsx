@@ -11,9 +11,15 @@ export default function SlideControls({
   canIncrease,
   canDecrease,
   onAddSlide,
+  onEditSlide,
+  onDeleteSlide,
+  isCustomSlide,
   onHelp,
+  onDownloadClick,
   onDownloadPDF,
+  onDownloadJSON,
   isGeneratingPDF,
+  showDownloadMenu,
   theme,
   onToggleTheme
 }) {
@@ -83,7 +89,7 @@ export default function SlideControls({
 
   return (
     <>
-      <div className="slide-controls">
+      <div className={`slide-controls ${isFullscreen ? 'fullscreen-mode' : ''}`}>
         <button
           className="control-button"
           onClick={onPrevious}
@@ -151,6 +157,33 @@ export default function SlideControls({
           <span>Add Slide</span>
         </button>
 
+        {isCustomSlide && (
+          <>
+            <button
+              className="control-button edit-slide-button"
+              onClick={onEditSlide}
+              title="Edit this custom slide"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              <span>Edit</span>
+            </button>
+
+            <button
+              className="control-button delete-slide-button"
+              onClick={onDeleteSlide}
+              title="Delete this custom slide"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+              </svg>
+              <span>Delete</span>
+            </button>
+          </>
+        )}
+
         <div className="control-divider" />
 
         <button
@@ -185,17 +218,47 @@ export default function SlideControls({
           <span>Help</span>
         </button>
 
-        <button
-          className="control-button download-pdf-button"
-          onClick={onDownloadPDF}
-          disabled={isGeneratingPDF}
-          title="Download presentation as PDF"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-          </svg>
-          <span>{isGeneratingPDF ? 'Generating...' : 'Download PDF'}</span>
-        </button>
+        <div className="download-dropdown">
+          <button
+            className="control-button download-button"
+            onClick={onDownloadClick}
+            disabled={isGeneratingPDF}
+            title="Download presentation"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+            </svg>
+            <span>{isGeneratingPDF ? 'Generating...' : 'Download'}</span>
+            <svg className="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+
+          {showDownloadMenu && (
+            <div className="download-menu">
+              <button className="download-menu-item" onClick={onDownloadPDF}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+                </svg>
+                <div className="menu-item-text">
+                  <span className="menu-item-title">Download as PDF</span>
+                  <span className="menu-item-desc">Print-ready document</span>
+                </div>
+              </button>
+              <button className="download-menu-item" onClick={onDownloadJSON}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <path d="M14 2v6h6M10 12h4M10 16h4M10 8h1" />
+                </svg>
+                <div className="menu-item-text">
+                  <span className="menu-item-title">Download as JSON</span>
+                  <span className="menu-item-desc">Editable data file</span>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
 
         <div className="control-divider" />
 

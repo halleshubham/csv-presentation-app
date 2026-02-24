@@ -912,6 +912,26 @@ kbd {
   backdrop-filter: blur(10px);
   border-top: 1px solid #334155;
   z-index: 1000;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Fullscreen mode - hide controls by default, show on hover */
+.slide-controls.fullscreen-mode {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.slide-controls.fullscreen-mode:hover {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Also show controls when hovering near bottom of screen in fullscreen */
+.presentation-view:fullscreen .slide-controls.fullscreen-mode:hover,
+.presentation-view:-webkit-full-screen .slide-controls.fullscreen-mode:hover,
+.presentation-view:-moz-full-screen .slide-controls.fullscreen-mode:hover {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .control-button {
@@ -984,6 +1004,26 @@ kbd {
   border-color: #06b6d4;
 }
 
+.edit-slide-button {
+  color: #fbbf24;
+  border-color: #f59e0b;
+}
+
+.edit-slide-button:hover:not(:disabled) {
+  background-color: #f59e0b;
+  border-color: #fbbf24;
+}
+
+.delete-slide-button {
+  color: #fca5a5;
+  border-color: #dc2626;
+}
+
+.delete-slide-button:hover:not(:disabled) {
+  background-color: #dc2626;
+  border-color: #f87171;
+}
+
 .help-button {
   color: #c4b5fd;
   border-color: #6d28d9;
@@ -994,19 +1034,93 @@ kbd {
   border-color: #8b5cf6;
 }
 
-.download-pdf-button {
-  color: #86efac;
-  border-color: #15803d;
+.download-dropdown {
+  position: relative;
 }
 
-.download-pdf-button:hover:not(:disabled) {
+.download-button {
+  color: #86efac;
+  border-color: #15803d;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-button:hover:not(:disabled) {
   background-color: #15803d;
   border-color: #22c55e;
 }
 
-.download-pdf-button:disabled {
+.download-button:disabled {
   opacity: 0.5;
   cursor: wait;
+}
+
+.dropdown-arrow {
+  width: 16px;
+  height: 16px;
+  margin-left: -4px;
+}
+
+.download-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  background-color: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  min-width: 240px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.download-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: #f1f5f9;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #334155;
+}
+
+.download-menu-item:last-child {
+  border-bottom: none;
+}
+
+.download-menu-item:hover {
+  background-color: #334155;
+}
+
+.download-menu-item svg {
+  width: 20px;
+  height: 20px;
+  color: #86efac;
+  flex-shrink: 0;
+}
+
+.menu-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menu-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.menu-item-desc {
+  font-size: 12px;
+  color: #94a3b8;
 }
 
 /* Confirmation Dialog */
@@ -1340,6 +1454,11 @@ kbd {
   border-top-color: #e2e8f0;
 }
 
+/* Light theme fullscreen controls */
+.light-theme .slide-controls.fullscreen-mode {
+  background-color: rgba(255, 255, 255, 0.98);
+}
+
 .light-theme .control-button {
   background-color: #ffffff;
   border-color: #cbd5e1;
@@ -1384,6 +1503,26 @@ kbd {
   border-color: #0891b2;
 }
 
+.light-theme .edit-slide-button {
+  color: #d97706;
+  border-color: #fbbf24;
+}
+
+.light-theme .edit-slide-button:hover:not(:disabled) {
+  background-color: #fef3c7;
+  border-color: #d97706;
+}
+
+.light-theme .delete-slide-button {
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.light-theme .delete-slide-button:hover:not(:disabled) {
+  background-color: #fee2e2;
+  border-color: #dc2626;
+}
+
 .light-theme .help-button {
   color: #7c3aed;
   border-color: #c4b5fd;
@@ -1394,14 +1533,37 @@ kbd {
   border-color: #7c3aed;
 }
 
-.light-theme .download-pdf-button {
+.light-theme .download-button {
   color: #16a34a;
   border-color: #86efac;
 }
 
-.light-theme .download-pdf-button:hover:not(:disabled) {
+.light-theme .download-button:hover:not(:disabled) {
   background-color: #f0fdf4;
   border-color: #16a34a;
+}
+
+.light-theme .download-menu {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.light-theme .download-menu-item {
+  color: #0f172a;
+  border-bottom-color: #e2e8f0;
+}
+
+.light-theme .download-menu-item:hover {
+  background-color: #f8fafc;
+}
+
+.light-theme .menu-item-title {
+  color: #0f172a;
+}
+
+.light-theme .menu-item-desc {
+  color: #64748b;
 }
 
 .light-theme .theme-toggle-button {

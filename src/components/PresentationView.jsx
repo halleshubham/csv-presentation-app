@@ -26,8 +26,11 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
   });
 
   const [showAddSlideModal, setShowAddSlideModal] = useState(false);
+  const [editingSlide, setEditingSlide] = useState(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [theme, setTheme] = useState(() => {
     try {
@@ -122,19 +125,73 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
   };
 
   const handleAddSlide = (slideData) => {
-    const newSlide = {
-      ...slideData,
-      id: Date.now(), // Unique ID for the custom slide
-      customSlideIndex: currentSlide + 1 // Position where it was inserted
-    };
+    if (editingSlide) {
+      // Update existing slide
+      const newSlides = slides.map((slide, index) =>
+        index === currentSlide ? { ...slide, ...slideData } : slide
+      );
 
-    // Insert the new slide after the current slide
-    const newSlides = [
-      ...slides.slice(0, currentSlide + 1),
-      newSlide,
-      ...slides.slice(currentSlide + 1)
-    ];
+      setSlides(newSlides);
 
+      // Save custom slides to localStorage
+      const customSlides = newSlides
+        .map((slide, index) => ({ ...slide, absoluteIndex: index }))
+        .filter(slide => slide.type === 'custom');
+      localStorage.setItem(CUSTOM_SLIDES_KEY, JSON.stringify(customSlides));
+
+      setEditingSlide(null);
+    } else {
+      // Add new slide
+      const newSlide = {
+        ...slideData,
+        id: Date.now(), // Unique ID for the custom slide
+        customSlideIndex: currentSlide + 1 // Position where it was inserted
+      };
+
+      // Insert the new slide after the current slide
+      const newSlides = [
+        ...slides.slice(0, currentSlide + 1),
+        newSlide,
+        ...slides.slice(currentSlide + 1)
+      ];
+
+      setSlides(newSlides);
+
+      // Save custom slides to localStorage
+      const customSlides = newSlides
+        .map((slide, index) => ({ ...slide, absoluteIndex: index }))
+        .filter(slide => slide.type === 'custom');
+      localStorage.setItem(CUSTOM_SLIDES_KEY, JSON.stringify(customSlides));
+
+      // Move to the newly created slide
+      transitionSlide(() => setCurrentSlide(currentSlide + 1));
+    }
+  };
+
+  const handleOpenAddSlide = () => {
+    setEditingSlide(null);
+    setShowAddSlideModal(true);
+  };
+
+  const handleOpenEditSlide = () => {
+    const currentSlideData = slides[currentSlide];
+    if (currentSlideData.type === 'custom') {
+      setEditingSlide(currentSlideData);
+      setShowAddSlideModal(true);
+    }
+  };
+
+  const handleCloseAddSlide = () => {
+    setShowAddSlideModal(false);
+    setEditingSlide(null);
+  };
+
+  const handleDeleteSlide = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteSlide = () => {
+    const newSlides = slides.filter((_, index) => index !== currentSlide);
     setSlides(newSlides);
 
     // Save custom slides to localStorage
@@ -143,16 +200,14 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
       .filter(slide => slide.type === 'custom');
     localStorage.setItem(CUSTOM_SLIDES_KEY, JSON.stringify(customSlides));
 
-    // Move to the newly created slide
-    transitionSlide(() => setCurrentSlide(currentSlide + 1));
+    // Move to previous slide or stay at 0
+    const newIndex = currentSlide > 0 ? currentSlide - 1 : 0;
+    setCurrentSlide(newIndex);
+    setShowDeleteConfirm(false);
   };
 
-  const handleOpenAddSlide = () => {
-    setShowAddSlideModal(true);
-  };
-
-  const handleCloseAddSlide = () => {
-    setShowAddSlideModal(false);
+  const cancelDeleteSlide = () => {
+    setShowDeleteConfirm(false);
   };
 
   const handleOpenHelp = () => {
@@ -165,6 +220,46 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
 
   const handleToggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
+  const handleDownloadJSON = () => {
+    try {
+      const exportData = {
+        version: '1.0',
+        timestamp: new Date().toISOString(),
+        slides,
+        currentSlide,
+        fontSize,
+        theme
+      };
+
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      link.setAttribute('href', url);
+      link.setAttribute('download', `presentation-${Date.now()}.json`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setShowDownloadMenu(false);
+    } catch (error) {
+      console.error('Error downloading JSON:', error);
+      alert('Failed to download JSON. Please try again.');
+    }
+  };
+
+  const handleDownloadClick = () => {
+    setShowDownloadMenu(!showDownloadMenu);
+  };
+
+  const handleDownloadPDFClick = () => {
+    setShowDownloadMenu(false);
+    handleDownloadPDF();
   };
 
   const handleDownloadPDF = async () => {
@@ -438,9 +533,15 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
         canIncrease={fontSize !== 'size-8'}
         canDecrease={fontSize !== 'size-1'}
         onAddSlide={handleOpenAddSlide}
+        onEditSlide={handleOpenEditSlide}
+        onDeleteSlide={handleDeleteSlide}
+        isCustomSlide={slides[currentSlide]?.type === 'custom'}
         onHelp={handleOpenHelp}
-        onDownloadPDF={handleDownloadPDF}
+        onDownloadClick={handleDownloadClick}
+        onDownloadPDF={handleDownloadPDFClick}
+        onDownloadJSON={handleDownloadJSON}
         isGeneratingPDF={isGeneratingPDF}
+        showDownloadMenu={showDownloadMenu}
         theme={theme}
         onToggleTheme={handleToggleTheme}
       />
@@ -449,11 +550,29 @@ export default function PresentationView({ slides: initialSlides, onRestart }) {
         <AddSlideModal
           onClose={handleCloseAddSlide}
           onAdd={handleAddSlide}
+          editSlide={editingSlide}
         />
       )}
 
       {showHelpModal && (
         <HelpModal onClose={handleCloseHelp} />
+      )}
+
+      {showDeleteConfirm && (
+        <div className="confirm-overlay" onClick={cancelDeleteSlide}>
+          <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
+            <h3>Delete This Slide?</h3>
+            <p>This custom slide will be permanently deleted. This action cannot be undone.</p>
+            <div className="confirm-buttons">
+              <button className="confirm-cancel" onClick={cancelDeleteSlide}>
+                Cancel
+              </button>
+              <button className="confirm-ok" onClick={confirmDeleteSlide}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
